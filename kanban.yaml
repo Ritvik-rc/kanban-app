@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kanban-postgres
+spec:
+  selector:
+    matchLabels:
+      app: kanban-postgres
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: kanban-postgres
+    spec:
+      containers:
+      - name: kanban-postgres
+        image: postgres:9.6-alpine 
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: kanban
+        - name: POSTGRES_USER
+          value: kanban
+        - name: POSTGRES_PASSWORD
+          value: kanban
+        volumeMounts: 
+        - name: kanban-data
+          mountPath: /var/lib/postgresql/data 
+      volumes: 
+      - name: kanban-data
+        emptyDir: {} 
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kanban-app
+spec:
+  selector:
+    matchLabels:
+      app: kanban-app
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: kanban-app
+    spec:
+      containers:
+      - name: kanban-app
+        image: ritvikrc/kanban-app
+        ports:
+        - containerPort: 8080
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kanban-ui
+spec:
+  selector:
+    matchLabels:
+      app: kanban-ui
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: kanban-ui
+    spec:
+      containers:
+      - name: kanban-ui
+        image: ritvikrc/kanban-ui:working
+        ports:
+        - containerPort: 80
+
+---
+
+apiVersion: v1
+kind: Service 
+metadata:
+  name: kanban-postgres
+spec:
+  ports:
+  - port: 5432
+    targetPort: 5432
+  selector: 
+    app: kanban-postgres
+
+---
+
+apiVersion: v1
+kind: Service 
+metadata:
+  name: kanban-app
+spec:
+  ports:
+  - port: 8080 
+    targetPort: 8080
+  selector: 
+    app: kanban-app
+
+---
+
+apiVersion: v1
+kind: Service 
+metadata:
+  name: kanban-ui
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80 
+    targetPort: 80
+    nodePort: 30321 
+  selector: 
+    app: kanban-ui

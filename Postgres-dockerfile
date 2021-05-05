@@ -1,0 +1,4 @@
+FROM postgres:9.6-alpine
+ENV POSTGRES_DB=kanban
+ENV POSTGRES_USER=kanban
+ENV POSTGRES_PASSWORD=kanban
