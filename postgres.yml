@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kanban-postgres
+spec:
+  selector:
+    matchLabels:
+      app: kanban-postgres
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: kanban-postgres
+    spec:
+      containers:
+      - name: kanban-postgres
+        image: postgres:9.6-alpine 
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: kanban
+        - name: POSTGRES_USER
+          value: kanban
+        - name: POSTGRES_PASSWORD
+          value: kanban
+        volumeMounts: 
+        - name: kanban-data
+          mountPath: /var/lib/postgresql/data 
+      volumes: 
+      - name: kanban-data
+        emptyDir: {} 
+
+---
+
+apiVersion: v1
+kind: Service 
+metadata:
+  name: kanban-postgres
+spec:
+  ports:
+  - port: 5432
+    targetPort: 5432
+  selector: 
+    app: kanban-postgres
